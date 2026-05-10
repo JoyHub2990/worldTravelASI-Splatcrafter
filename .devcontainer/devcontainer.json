@@ -1,0 +1,60 @@
+{
+  "name": "WorldTravel ASI - Hardened Sandbox",
+
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+
+  "containerUser": "vscode",
+
+  "workspaceFolder": "/workspaces/worldTravelASI",
+  "workspaceMount": "type=volume,source=worldtravelasi-src,target=/workspaces/worldTravelASI",
+
+  "customizations": {
+    "jetbrains": {
+      "backend": "CLion",
+      "plugins": [
+        "com.anthropic.code.plugin"
+      ]
+    }
+  },
+
+  "forwardPorts": [8080],
+  "portsAttributes": {
+    "8080": {
+      "label": "Claude Code OAuth Callback",
+      "onAutoForward": "ignore"
+    }
+  },
+
+  "runArgs": [
+    "--cap-drop=ALL",
+    "--cap-add=CHOWN",
+    "--cap-add=SETGID",
+    "--cap-add=SETUID",
+    "--cap-add=KILL",
+    "--cap-add=NET_ADMIN",
+    "--cap-add=FOWNER",
+    "--security-opt=no-new-privileges",
+    "--memory=6g",
+    "--cpus=4",
+    "--pids-limit=2048",
+    "--add-host=host.docker.internal:host-gateway",
+    "-p", "8080:8080"
+  ],
+
+  "mounts": [
+    "type=volume,source=worldtravelasi-claude,target=/home/vscode/.claude"
+  ],
+
+  "postCreateCommand": "bash ${containerWorkspaceFolder}/.devcontainer/post-create.sh",
+
+  "containerEnv": {
+    "CLAUDE_CODE_SANDBOX": "true",
+    "NO_PROXY": "localhost,127.0.0.1",
+    "no_proxy": "localhost,127.0.0.1",
+    "WORKSPACE_DIR": "${containerWorkspaceFolder}"
+  },
+
+  "postStartCommand": "echo 'WorldTravel ASI sandbox active. Egress firewall locked down to the whitelist. Native + mingw-w64 cross-compile toolchain available; build inside the container, then copy artifacts out explicitly. Run `claude` to start; plugins and MCP are pre-provisioned.'"
+}
