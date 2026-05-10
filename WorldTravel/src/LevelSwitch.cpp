@@ -1907,7 +1907,7 @@ namespace levelSwitch
 	{
 		if (!ENTITY::IS_ENTITY_DEAD(playerPed) && ENTITY::IS_ENTITY_AT_COORD(playerPed, LosSantosIntAirport[0], LosSantosIntAirport[1], LosSantosIntAirport[2], 150.0f, 150.0f, 150.0f, 0, 1, 0) && !PED::IS_PED_IN_ANY_VEHICLE(player, 0))
 		{
-			GRAPHICS::DRAW_MARKER(1, -1050.53f, -2741.48f, 13.60f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.6f, 0.6f, 0.5f, 240, 200, 80, 150, false, false, 2, false, false, false, 0);
+			GRAPHICS::DRAW_MARKER(1, -1050.53f, -2741.48f, 13.60f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.6f, 0.6f, 0.5f, 240, 200, 80, 150, false, false, 2, false, nullptr, nullptr, 0);
 			if (ENTITY::IS_ENTITY_AT_COORD(playerPed, LosSantosIntAirport[0], LosSantosIntAirport[1], LosSantosIntAirport[2], 1.0f, 1.0f, 1.0f, 0, 1, 0))
 			{
 				if (PLAYER::GET_PLAYER_WANTED_LEVEL(PLAYER::PLAYER_ID()) == 0)
@@ -1999,7 +1999,7 @@ namespace levelSwitch
 	{
 		if (!ENTITY::IS_ENTITY_DEAD(playerPed) && ENTITY::IS_ENTITY_AT_COORD(playerPed, FrancisIntAirport[0], FrancisIntAirport[1], FrancisIntAirport[2], 150.0f, 150.0f, 150.0f, 0, 1, 0) && !PED::IS_PED_IN_ANY_VEHICLE(player, 0))
 		{
-			GRAPHICS::DRAW_MARKER(1, 7553.86f, -2879.39f, 5.08f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.6f, 0.6f, 0.5f, 240, 200, 80, 150, false, false, 2, false, false, false, 0);
+			GRAPHICS::DRAW_MARKER(1, 7553.86f, -2879.39f, 5.08f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.6f, 0.6f, 0.5f, 240, 200, 80, 150, false, false, 2, false, nullptr, nullptr, 0);
 			if (ENTITY::IS_ENTITY_AT_COORD(playerPed, FrancisIntAirport[0], FrancisIntAirport[1], FrancisIntAirport[2], 1.0f, 1.0f, 1.0f, 0, 1, 0))
 			{
 				if (PLAYER::GET_PLAYER_WANTED_LEVEL(PLAYER::PLAYER_ID()) == 0)
@@ -2232,7 +2232,7 @@ namespace levelSwitch
 
 			if (currentLocation != -1 && !ENTITY::IS_ENTITY_DEAD(playerPed) && ENTITY::IS_ENTITY_AT_COORD(player, docks[currentLocation].coords[0], docks[currentLocation].coords[1], docks[currentLocation].coords[2], 150.0f, 150.0f, 150.0f, 0, 1, 0))
 			{
-				GRAPHICS::DRAW_MARKER(1, docks[currentLocation].markerX, docks[currentLocation].markerY, docks[currentLocation].markerZ, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 9.0f, 9.0f, 0.8f, 240, 200, 80, 150, false, false, 2, false, false, false, 0);
+				GRAPHICS::DRAW_MARKER(1, docks[currentLocation].markerX, docks[currentLocation].markerY, docks[currentLocation].markerZ, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 9.0f, 9.0f, 0.8f, 240, 200, 80, 150, false, false, 2, false, nullptr, nullptr, 0);
 
 				if (ENTITY::IS_ENTITY_AT_COORD(player, docks[currentLocation].coords[0], docks[currentLocation].coords[1], docks[currentLocation].coords[2], 10.0f, 10.0f, 1.0f, 0, 1, 0))
 				{

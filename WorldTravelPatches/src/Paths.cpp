@@ -6,7 +6,7 @@
 #include "CDataFileMgr.h"
 #include <spdlog/spdlog.h>
 #include <filesystem>
-#include <Windows.h>
+#include <windows.h>
 
 // Unused Currently
 

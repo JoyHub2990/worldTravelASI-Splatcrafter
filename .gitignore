@@ -3,6 +3,13 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# CMake / CLion build directories
+/build/
+/cmake-build-*/
+
+# xwin cache (MSVC SDK splat output cache)
+/.xwin-cache/
+
 # User-specific files
 *.rsuser
 *.suo

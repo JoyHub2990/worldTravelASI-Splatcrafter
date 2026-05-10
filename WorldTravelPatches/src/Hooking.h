@@ -1,10 +1,19 @@
 #pragma once
-#include <Windows.h>
+#include <windows.h>
+#include <cstring>
 #include <stdint.h>
 #include <type_traits>
 
 #include "Hooking.Patterns.h"
 #include "Hooking.Stubs.h"
+
+namespace hook
+{
+	// Forward declaration so jump_reg/call_reg can call put<> before its definition
+	// further down. MSVC tolerates the original ordering; GCC does not.
+	template<typename ValueType, typename AddressType>
+	inline void put(AddressType address, ValueType value);
+}
 
 /*
  * This file is part of the CitizenFX project - http://citizen.re/

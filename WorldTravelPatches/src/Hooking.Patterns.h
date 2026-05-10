@@ -108,22 +108,22 @@ namespace hook
 		{
 		}
 
-		pattern(std::string_view pattern)
+		pattern(std::string_view bytePattern)
 			: pattern(getRVA(0))
 		{
-			Initialize(std::move(pattern));
+			Initialize(std::move(bytePattern));
 		}
 
-		inline pattern(void* module, std::string_view pattern)
+		inline pattern(void* module, std::string_view bytePattern)
 			: pattern(reinterpret_cast<uintptr_t>(module))
 		{
-			Initialize(std::move(pattern));
+			Initialize(std::move(bytePattern));
 		}
 
-		inline pattern(uintptr_t begin, uintptr_t end, std::string_view pattern)
+		inline pattern(uintptr_t begin, uintptr_t end, std::string_view bytePattern)
 			: m_rangeStart(begin), m_rangeEnd(end)
 		{
-			Initialize(std::move(pattern));
+			Initialize(std::move(bytePattern));
 		}
 
 		inline pattern&& count(uint32_t expected)

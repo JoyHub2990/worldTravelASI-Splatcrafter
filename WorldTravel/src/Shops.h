@@ -5,6 +5,5 @@
 #include "PayNSpray.h"
 
 
-#pragma comment(lib, "../lib/scripthookv.lib")
 
 void Shops();

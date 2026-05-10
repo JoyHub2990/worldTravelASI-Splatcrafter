@@ -1,4 +1,4 @@
-#include <Windows.h>
+#include <windows.h>
 #include "Settings.h"
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/basic_file_sink.h>

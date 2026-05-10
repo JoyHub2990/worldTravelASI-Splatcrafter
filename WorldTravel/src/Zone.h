@@ -1,5 +1,5 @@
 #include <string>
-#include "..\dependencies\include\natives.h"
+#include "../dependencies/include/natives.h"
 
 using namespace std;
 #ifndef MAPZONE

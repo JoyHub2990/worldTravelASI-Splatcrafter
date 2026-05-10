@@ -226,7 +226,9 @@ namespace hook
 			}
 		}
 
+#ifdef _MSC_VER
 		__try
+#endif
 		{
 			for (uintptr_t i = executable.begin(), end = executable.end() - maskSize; i <= end;)
 			{
@@ -248,9 +250,11 @@ namespace hook
 				else i += std::max(ptrdiff_t(1), j - Last[ptr[j]]);
 			}
 		}
+#ifdef _MSC_VER
 		__except ((GetExceptionCode() == EXCEPTION_ACCESS_VIOLATION) ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH)
 		{
 		}
+#endif
 
 		m_matched = true;
 	}

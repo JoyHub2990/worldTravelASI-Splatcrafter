@@ -3,6 +3,5 @@
 #include "PlayerLocation.h"
 
 
-#pragma comment(lib, "../lib/scripthookv.lib")
 
 void Helpers();

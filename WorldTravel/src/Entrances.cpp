@@ -49,7 +49,7 @@ namespace entrances
             0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
             horizontalScale, horizontalScale, verticalScale,
             240, 200, 80, 150,
-            false, false, 2, false, false, false, 0
+            false, false, 2, false, nullptr, nullptr, 0
         );
     }
 

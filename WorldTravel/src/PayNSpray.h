@@ -2,10 +2,10 @@
 
 
 #include <windows.h>
-#include "..\dependencies\include\natives.h"
-#include "..\dependencies\include\types.h"
-#include "..\dependencies\include\enums.h"
-#include "..\include\main.h"
+#include "../dependencies/include/natives.h"
+#include "../dependencies/include/types.h"
+#include "../dependencies/include/enums.h"
+#include "../include/main.h"
 #include <string>
 #include <vector>
 #include "HelpText.h"

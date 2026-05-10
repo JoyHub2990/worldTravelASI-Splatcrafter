@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 #include "FileReader.h"
-#include "..\dependencies\include\natives.h"
+#include "../dependencies/include/natives.h"
 
 using namespace std;
 #ifndef WEATHERTYPES

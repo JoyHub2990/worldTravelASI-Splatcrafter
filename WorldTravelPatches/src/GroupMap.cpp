@@ -2,7 +2,7 @@
 #include "Hooking.Patterns.h"
 #include "Hashing.h"
 #include "Settings.h"
-#include <Windows.h>
+#include <windows.h>
 
 void GroupMap::Init()
 {

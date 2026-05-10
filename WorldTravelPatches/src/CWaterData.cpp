@@ -3,7 +3,7 @@
 #include "CWaterTune.h"
 #include  <cstdint>
 #include <string.h>
-#include <Windows.h>
+#include <windows.h>
 #include "Settings.h"
 
 void CWaterData::switchWater(eWaterArea waterArea)
@@ -20,7 +20,7 @@ void CWaterData::switchWater(eWaterArea waterArea)
             *CWaterData::bd_max_x = Settings::CayoPericoMaxX;
             *CWaterData::bd_max_y = Settings::CayoPericoMaxY;
 
-            CWaterTune::load("common:/data/watertune_HeistIsland.xml");
+            CWaterTune::load(const_cast<char*>("common:/data/watertune_HeistIsland.xml"));
             CWaterTune::loadWaterFog();
             char* xmlpath = CWaterTune::GetFirstFile(*CDataFileMgr::sm_Instance, 68); //get water_heistIsland.xml from common
             while (*(uint64_t*)(xmlpath + 0x94) != -1)
@@ -53,10 +53,10 @@ void CWaterData::switchWater(eWaterArea waterArea)
             *CWaterData::bd_min_y = Settings::LibertyCityMinY;
             *CWaterData::bd_max_y = Settings::LibertyCityMaxY;
 
-            CWaterTune::load("common:/data/watertune_libertycity.xml");
+            CWaterTune::load(const_cast<char*>("common:/data/watertune_libertycity.xml"));
             CWaterTune::loadWaterFog();
             CWaterData::unload();
-            CWaterData::load("update:/common/data/levels/gta5/water_libertycity.xml");
+            CWaterData::load(const_cast<char*>("update:/common/data/levels/gta5/water_libertycity.xml"));
         }
     }
 }

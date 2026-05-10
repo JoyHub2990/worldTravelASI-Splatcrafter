@@ -1,12 +1,14 @@
 #include "Respawn.h"
-#include <fstream>  
+#include <cfloat>
+#include <cmath>
+#include <fstream>
 #include <windows.h>
 #include <string>
 #include <ctime>
 #include <iostream>
 #include <vector>
 #include <mmdeviceapi.h>
-#include <Audiopolicy.h>
+#include <audiopolicy.h>
 #include <combaseapi.h>
 
 namespace respawn

@@ -1,5 +1,5 @@
 #include "Hooking.h"
-#include <Windows.h>
+#include <windows.h>
 
 namespace hook
 {

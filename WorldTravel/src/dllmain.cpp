@@ -1,9 +1,9 @@
-#include <Windows.h>
+#include <windows.h>
 #include "Hooking.Patterns.h"
 #include "Farlods.h"
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/basic_file_sink.h>
-#include "..\include\main.h"
+#include "../include/main.h"
 #include "Entrances.h"
 #include "Helpers.h"
 #include "LevelSwitch.h"

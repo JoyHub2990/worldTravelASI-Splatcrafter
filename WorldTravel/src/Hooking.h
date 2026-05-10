@@ -1,4 +1,6 @@
 #pragma once
+#include <windows.h>
+#include <cstring>
 #include <stdint.h>
 #include <type_traits>
 
