@@ -57,44 +57,49 @@
      Compiles the source for static analysis and IDE feature coverage; the
      final link fails on the MSVC-only `.lib`s, so this is editor-only.
 
-   #### One-time setup (clang-cl path)
+   #### Setup
+
+   Inside the bundled dev container nothing extra is needed: the Dockerfile
+   bakes xwin, the splatted MSVC SDK (VS 2019 manifest, picked because Clang 14
+   from Debian 12 can't parse the newer STL), `lld-link`, and a MinHook source
+   tree into `/opt/wtasi-toolchain/`. `post-create.sh` runs
+   `cmake/strip-mojito-ltcg.sh` once on container creation to write the
+   LTCG-stripped mojito-wt to `/opt/wtasi-toolchain/mojito-wt-clean.lib`.
+   Container rebuilds redo the strip step but reuse the image-baked toolchain.
+
+   Outside the dev container (e.g. on a plain Linux host you maintain
+   yourself), reproduce the same layout under `~/.local/`:
 
    ```bash
-   # 1. Fetch xwin (downloads the MSVC redistributable headers + import libs).
+   # xwin
    curl -sSfL https://github.com/Jake-Shadle/xwin/releases/download/0.9.0/xwin-0.9.0-x86_64-unknown-linux-musl.tar.gz \
        | tar -xz -C /tmp
    install -m 755 /tmp/xwin-0.9.0-x86_64-unknown-linux-musl/xwin ~/.local/bin/xwin
-
-   # 2. Splat MSVC SDK. Manifest 16 = VS 2019 era, picked because the LLVM 14
-   #    that ships with Debian 12 cannot consume the C++23 STL in manifest 17.
    xwin --accept-license --manifest-version 16 --arch x86_64 \
        --cache-dir ~/.xwin-cache splat --output ~/.xwin
 
-   # 3. Install lld-link 14 (no apt source on this image; deb-extract instead).
+   # lld-link from the Debian lld-14 .deb
    curl -sSfL -o /tmp/lld-14.deb \
        http://ftp.debian.org/debian/pool/main/l/llvm-toolchain-14/lld-14_14.0.6-12_amd64.deb
    dpkg-deb -x /tmp/lld-14.deb ~/.local/lld-extract
    ln -sf ~/.local/lld-extract/usr/lib/llvm-14/bin/lld-link ~/.local/bin/lld-link
 
-   # 4. Stage MinHook source. The vendored libMinHook-x64-v141-md.lib is MSVC
-   #    LTCG bitcode that lld-link cannot consume; building from upstream
-   #    yields a plain COFF .lib.
+   # MinHook source (vendored libMinHook-x64-v141-md.lib is MSVC LTCG bitcode
+   # that lld-link can't consume; building from upstream yields plain COFF)
    git clone --depth=1 https://github.com/TsudaKageyu/minhook.git /tmp/minhook
    mkdir -p ~/.local/minhook-build/src/hde ~/.local/minhook-build/include
    cp /tmp/minhook/src/{buffer.c,buffer.h,hook.c,trampoline.c,trampoline.h} ~/.local/minhook-build/src/
    cp /tmp/minhook/src/hde/{hde64.c,hde64.h,pstdint.h,table64.h} ~/.local/minhook-build/src/hde/
    cp /tmp/minhook/include/MinHook.h ~/.local/minhook-build/include/
+   cp .devcontainer/wtasi-toolchain-files/minhook-CMakeLists.txt ~/.local/minhook-build/CMakeLists.txt
 
-   # 5. Strip the v141 LTCG bytecode out of mojito-wt-md.lib. The mojito-wt
-   #    code itself is plain COFF, but the .lib bundles MinHook v141 LTCG
-   #    members internally; the helper extracts every mojito-own .obj and
-   #    repacks them as a clean .lib that lld-link can finalize.
+   # Strip the LTCG bundled MinHook out of mojito-wt-md.lib
    ./cmake/strip-mojito-ltcg.sh
    ```
 
-   The MinHook CMakeLists.txt for `~/.local/minhook-build/` lives outside the
-   repo on purpose — see `cmake/toolchain-clang-cl-xwin.cmake` for the layout
-   the root CMakeLists expects.
+   The CMake toolchain file probes `/opt/wtasi-toolchain/` first and falls
+   back to `~/.local/` automatically, so either layout works from the same
+   `cmake -DCMAKE_TOOLCHAIN_FILE=…` invocation.
 
    #### Configure and build
 

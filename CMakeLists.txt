@@ -71,10 +71,16 @@ endif()
 
 # Optional: build MinHook from upstream source instead of using the vendored
 # LTCG .lib. The vendored libMinHook-x64-v141-md.lib is MSVC bitcode, which
-# only link.exe can finalize — lld-link rejects it. Point WTASI_LOCAL_MINHOOK
-# at a checkout of https://github.com/TsudaKageyu/minhook (or the staging
-# directory we set up under ~/.local/minhook-build) to bypass this.
-set(WTASI_LOCAL_MINHOOK "$ENV{HOME}/.local/minhook-build" CACHE PATH
+# only link.exe can finalize — lld-link rejects it. The .devcontainer image
+# bakes a checkout of https://github.com/TsudaKageyu/minhook into
+# /opt/wtasi-toolchain/minhook with a project-supplied CMakeLists.txt; we use
+# that by default. Override WTASI_LOCAL_MINHOOK to point elsewhere if needed.
+if(EXISTS "/opt/wtasi-toolchain/minhook/CMakeLists.txt")
+    set(_wtasi_minhook_default "/opt/wtasi-toolchain/minhook")
+else()
+    set(_wtasi_minhook_default "$ENV{HOME}/.local/minhook-build")
+endif()
+set(WTASI_LOCAL_MINHOOK "${_wtasi_minhook_default}" CACHE PATH
     "Optional path to a MinHook source tree with a CMakeLists.txt. \
 Leave empty to use the vendored .lib.")
 
@@ -89,9 +95,14 @@ endif()
 # Optional: bypass the vendored mojito-wt-md.lib in favor of a re-archived
 # variant. The shipped lib bundles MinHook v141 LTCG bitcode that lld-link
 # rejects; the clean variant is the same lib with those LTCG members stripped.
-# Generate it with the script in cmake/strip-mojito-ltcg.sh.
-set(WTASI_LOCAL_MOJITO_WT "$ENV{HOME}/.local/mojito-wt-clean/mojito-wt-clean.lib"
-    CACHE FILEPATH
+# .devcontainer/post-create.sh runs cmake/strip-mojito-ltcg.sh and writes the
+# clean lib to /opt/wtasi-toolchain/mojito-wt-clean.lib. Override otherwise.
+if(EXISTS "/opt/wtasi-toolchain/mojito-wt-clean.lib")
+    set(_wtasi_mojito_default "/opt/wtasi-toolchain/mojito-wt-clean.lib")
+else()
+    set(_wtasi_mojito_default "$ENV{HOME}/.local/mojito-wt-clean/mojito-wt-clean.lib")
+endif()
+set(WTASI_LOCAL_MOJITO_WT "${_wtasi_mojito_default}" CACHE FILEPATH
     "Optional path to a re-archived mojito-wt-md.lib without LTCG members. \
 Leave empty to use the vendored .lib.")
 

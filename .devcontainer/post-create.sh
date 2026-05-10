@@ -230,6 +230,45 @@ if command -v claude >/dev/null 2>&1; then
     claude plugin list 2>&1 || echo "INFO: claude plugin list unavailable"
 fi
 
+echo "=== Wiring wtasi cross-compile toolchain into PATH ==="
+# /opt/wtasi-toolchain/bin holds xwin, lld-link, ld.lld, lld (image-baked, see
+# Dockerfile). We add it to vscode's persistent shell rcs so terminals opened
+# in CLion pick it up without per-session sourcing. The leading entry beats
+# /usr/bin so our lld-link wins over any system one if Debian ever ships it.
+TOOLCHAIN_BIN=/opt/wtasi-toolchain/bin
+for rc in /home/vscode/.bashrc /home/vscode/.zshrc /home/vscode/.profile; do
+    [ -f "$rc" ] || continue
+    if ! grep -qF "$TOOLCHAIN_BIN" "$rc"; then
+        echo "" >> "$rc"
+        echo "# wtasi cross-compile toolchain (xwin, lld-link, etc.)" >> "$rc"
+        echo "export PATH=\"$TOOLCHAIN_BIN:\$PATH\"" >> "$rc"
+    fi
+done
+export PATH="$TOOLCHAIN_BIN:$PATH"
+
+echo "=== Producing LTCG-stripped mojito-wt clean lib ==="
+# The vendored WorldTravelPatches/dependencies/lib/mojito-wt-md.lib bundles
+# MinHook v141 LTCG members internally that lld-link can't finalize. The
+# helper script extracts mojito's own (plain COFF) members and re-archives
+# them with llvm-lib so lld-link is happy. mojito-wt-md.lib lives in the
+# workspace volume (not available at image-build time), so we run this here.
+# Output goes to /opt/wtasi-toolchain (writable; lost on container rebuild,
+# regenerated cheaply on the next post-create run).
+STRIP_SCRIPT="$WORKSPACE_DIR/cmake/strip-mojito-ltcg.sh"
+MOJITO_OUT=/opt/wtasi-toolchain/mojito-wt-clean.lib
+if [ -x "$STRIP_SCRIPT" ]; then
+    if "$STRIP_SCRIPT" \
+            "$WORKSPACE_DIR/WorldTravelPatches/dependencies/lib/mojito-wt-md.lib" \
+            "$MOJITO_OUT"; then
+        chown vscode:vscode "$MOJITO_OUT"
+        echo "OK: $MOJITO_OUT"
+    else
+        echo "WARN: strip-mojito-ltcg.sh failed; WorldTravelPatches.asi link will fall back to the LTCG .lib (will not work with lld-link)."
+    fi
+else
+    echo "WARN: $STRIP_SCRIPT not present or not executable; skipping mojito-wt cleaning."
+fi
+
 echo "=== Configuring strict egress firewall ==="
 sudo iptables -P OUTPUT DROP
 sudo iptables -A OUTPUT -o lo -j ACCEPT

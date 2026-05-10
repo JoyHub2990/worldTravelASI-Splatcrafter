@@ -127,3 +127,93 @@ RUN tmp=$(mktemp) && \
 
 COPY --from=skill-sources --chown=vscode:vscode /marketplaces/impeccable/ \
         /opt/claude-marketplaces/impeccable/
+
+# ----- Cross-compile toolchain for the worldTravelASI Windows target ---------
+# Goal: produce a self-contained image where `cmake --build` from within the
+# container can link both .asi files without any further user setup. Everything
+# under /opt/wtasi-toolchain/ is image-baked, survives container rebuilds, and
+# stays out of the user's home directory (which is a Docker volume).
+#
+# Three pieces matter here:
+#   1. xwin binary + splatted MSVC SDK headers/import libs (Microsoft VS 2019
+#      manifest, picked because Clang 14 from Debian 12 cannot parse the C++23
+#      STL in newer manifests).
+#   2. lld-link from Debian's lld-14 .deb (the base image's apt sources don't
+#      carry lld-14, only lldb-14 — so we fetch the .deb directly and lift the
+#      binaries out).
+#   3. MinHook upstream source. The vendored libMinHook-x64-v141-md.lib in the
+#      project bundles MSVC LTCG bytecode that lld-link rejects, so we compile
+#      MinHook from source ourselves; the CMakeLists.txt for that build lives
+#      at .devcontainer/wtasi-toolchain-files/minhook-CMakeLists.txt.
+#
+# The mojito-wt-md.lib cleaning step (cmake/strip-mojito-ltcg.sh) is the only
+# piece NOT baked here, because it needs the workspace volume that mounts at
+# runtime. post-create.sh runs the script during container creation and writes
+# the cleaned lib to /opt/wtasi-toolchain/mojito-wt-clean.lib.
+RUN install -d -o vscode -g vscode \
+        /opt/wtasi-toolchain \
+        /opt/wtasi-toolchain/bin \
+        /opt/wtasi-toolchain/minhook \
+        /opt/wtasi-toolchain/minhook/src \
+        /opt/wtasi-toolchain/minhook/src/hde \
+        /opt/wtasi-toolchain/minhook/include
+
+# xwin: download the static-musl release binary. We don't run `xwin splat`
+# here yet — it's done in a later layer after the Microsoft license terms are
+# explicitly accepted via --accept-license.
+RUN curl -fsSL \
+        https://github.com/Jake-Shadle/xwin/releases/download/0.9.0/xwin-0.9.0-x86_64-unknown-linux-musl.tar.gz \
+        -o /tmp/xwin.tar.gz \
+    && tar -xzf /tmp/xwin.tar.gz -C /tmp \
+    && install -m 755 /tmp/xwin-0.9.0-x86_64-unknown-linux-musl/xwin /opt/wtasi-toolchain/bin/xwin \
+    && rm -rf /tmp/xwin.tar.gz /tmp/xwin-0.9.0-x86_64-unknown-linux-musl
+
+# lld-link: fetch the lld-14 deb from Debian's archive and lift just the
+# linker binaries. The whole package is ~10 MB; we keep lld, ld.lld, lld-link.
+RUN curl -fsSL \
+        http://ftp.debian.org/debian/pool/main/l/llvm-toolchain-14/lld-14_14.0.6-12_amd64.deb \
+        -o /tmp/lld-14.deb \
+    && dpkg-deb -x /tmp/lld-14.deb /tmp/lld-extract \
+    && install -m 755 /tmp/lld-extract/usr/lib/llvm-14/bin/lld-link \
+                      /tmp/lld-extract/usr/lib/llvm-14/bin/ld.lld \
+                      /tmp/lld-extract/usr/lib/llvm-14/bin/lld \
+                      /opt/wtasi-toolchain/bin/ \
+    && rm -rf /tmp/lld-14.deb /tmp/lld-extract
+
+# MinHook source. Shallow clone to a temp dir, copy only the files we use into
+# the toolchain tree, drop the rest. The CMakeLists.txt comes from the repo
+# (committed under .devcontainer/wtasi-toolchain-files/) so the build is
+# reproducible without depending on whatever upstream MinHook ships.
+RUN for i in 1 2 3; do \
+        git clone --depth=1 https://github.com/TsudaKageyu/minhook.git /tmp/minhook && exit 0; \
+        echo "minhook clone failed (attempt $i), retrying in 5s..."; sleep 5; \
+    done; exit 1
+RUN cp /tmp/minhook/src/buffer.c \
+        /tmp/minhook/src/buffer.h \
+        /tmp/minhook/src/hook.c \
+        /tmp/minhook/src/trampoline.c \
+        /tmp/minhook/src/trampoline.h \
+        /opt/wtasi-toolchain/minhook/src/ \
+    && cp /tmp/minhook/src/hde/hde64.c \
+        /tmp/minhook/src/hde/hde64.h \
+        /tmp/minhook/src/hde/pstdint.h \
+        /tmp/minhook/src/hde/table64.h \
+        /opt/wtasi-toolchain/minhook/src/hde/ \
+    && cp /tmp/minhook/include/MinHook.h /opt/wtasi-toolchain/minhook/include/ \
+    && cp /tmp/minhook/LICENSE.txt /opt/wtasi-toolchain/minhook/LICENSE.txt \
+    && rm -rf /tmp/minhook \
+    && chown -R vscode:vscode /opt/wtasi-toolchain/minhook
+COPY --chown=vscode:vscode wtasi-toolchain-files/minhook-CMakeLists.txt \
+        /opt/wtasi-toolchain/minhook/CMakeLists.txt
+
+# Splat the MSVC SDK. Manifest 16 = VS 2019 era; Clang 14 cannot parse the
+# newer (manifest 17) STL because of C++23 features it doesn't support. The
+# splat is ~600 MB so this layer is large, but the trade-off is "instant
+# build-ready container" vs "5-10 min download on every fresh container".
+# --accept-license is acknowledged here on behalf of whoever rebuilds this
+# image; the project README explains the implications.
+RUN /opt/wtasi-toolchain/bin/xwin --accept-license --manifest-version 16 --arch x86_64 \
+        --cache-dir /tmp/xwin-cache \
+        splat --output /opt/wtasi-toolchain/xwin \
+    && rm -rf /tmp/xwin-cache \
+    && chown -R vscode:vscode /opt/wtasi-toolchain/xwin

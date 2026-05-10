@@ -16,7 +16,11 @@ set(CMAKE_SYSTEM_PROCESSOR AMD64)
 if(NOT DEFINED XWIN_ROOT)
     if(DEFINED ENV{XWIN_ROOT})
         set(XWIN_ROOT "$ENV{XWIN_ROOT}")
+    elseif(EXISTS "/opt/wtasi-toolchain/xwin/crt/include")
+        # Image-baked path (see .devcontainer/Dockerfile).
+        set(XWIN_ROOT "/opt/wtasi-toolchain/xwin")
     else()
+        # Fallback for hand-installed setups.
         set(XWIN_ROOT "$ENV{HOME}/.xwin")
     endif()
 endif()
@@ -34,8 +38,18 @@ find_program(CLANG_CL_EXE
 )
 find_program(LLD_LINK_EXE
     NAMES lld-link lld-link-14 lld-link-15 lld-link-16 lld-link-17 lld-link-18
-    PATHS "$ENV{HOME}/.local/bin" /usr/lib/llvm-14/bin /usr/bin
+    # Prefer the image-baked tool (see .devcontainer/Dockerfile) over any
+    # hand-installed binary. /usr/bin is last because Debian's apt repo for
+    # this image carries lldb-14 but not lld-14 — so it'll never match there.
+    PATHS /opt/wtasi-toolchain/bin "$ENV{HOME}/.local/bin" /usr/lib/llvm-14/bin /usr/bin
+    NO_DEFAULT_PATH
 )
+if(NOT LLD_LINK_EXE)
+    # Fall back to the standard search if the curated paths missed it.
+    find_program(LLD_LINK_EXE
+        NAMES lld-link lld-link-14 lld-link-15 lld-link-16 lld-link-17 lld-link-18
+    )
+endif()
 find_program(LLVM_RC_EXE
     NAMES llvm-rc llvm-rc-14
     PATHS /usr/lib/llvm-14/bin /usr/bin

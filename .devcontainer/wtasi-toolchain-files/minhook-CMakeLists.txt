@@ -1,0 +1,26 @@
+cmake_minimum_required(VERSION 3.20)
+project(minhook C)
+
+# x64-only static MinHook for the worldTravelASI project. Built from upstream
+# https://github.com/TsudaKageyu/minhook so the resulting .lib is plain COFF
+# (no MSVC LTCG bitcode) and links cleanly with lld-link.
+
+add_library(minhook STATIC
+    src/buffer.c
+    src/hook.c
+    src/trampoline.c
+    src/hde/hde64.c
+)
+
+target_include_directories(minhook PUBLIC include)
+
+if(MSVC OR CMAKE_C_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+    target_compile_options(minhook PRIVATE /W3)
+else()
+    target_compile_options(minhook PRIVATE -Wall -Wno-pointer-to-int-cast)
+endif()
+
+set_target_properties(minhook PROPERTIES
+    OUTPUT_NAME "MinHook"
+    POSITION_INDEPENDENT_CODE ON
+)
