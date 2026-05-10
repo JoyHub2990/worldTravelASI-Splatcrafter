@@ -44,6 +44,25 @@
          bundled spdlog `{}` placeholders fail silently in this build of
          the format library).
 
+  - **`WorldTravel/src/Minimap.cpp`** (`TriggerLibertyCityRadarInterior` +
+    hardened `Minimap_Hooks`): added on 2026-05-10 to fix the transparent
+    Liberty City minimap and pause map on build 3788 onward. Resolves the
+    long-standing "Live HUD minimap renders transparent in Liberty City"
+    known-issue. The May-2025 source drop had stripped the per-frame radar
+    trigger that was present in the Jan-2025 binary release; without it,
+    the LS-bitmap-suppression hooks fire correctly but nothing tells the
+    radar renderer to substitute the LC tiles, so the minimap stays empty.
+    Recovered by static disassembly of the legacy Dec-2024 `WorldTravel.asi`
+    at VMA `0x1800229e0`: a per-frame loop that, while the player is in LC,
+    issues `SET_RADAR_AS_EXTERIOR_THIS_FRAME` (clears any prior interior
+    state), `GET_HASH_KEY("v_fakelibertycity")`, then
+    `SET_RADAR_AS_INTERIOR_THIS_FRAME(hash, LibertyCityGFXPos[0],
+    LibertyCityGFXPos[1], 0, 0)`. Reimplemented 1:1 in `Minimap.cpp` and
+    wired into `MinimapMain`. Also took the opportunity to apply the same
+    diagnostic + graceful-fail treatment to the two existing
+    `Minimap_Hooks` pattern installs so future Rockstar build bumps log
+    rather than silently mis-install.
+
    ## Changes from upstream (googleplex2010/worldTravelASI)
 
    - **`WorldTravelPatches/src/PopZones.h`**: Loosened pattern 2's jump-distance
@@ -61,11 +80,6 @@
 
    ## Known issues (not fixed)
 
-   - **Live HUD minimap renders transparent in Liberty City.** Pause map is fine.
-     Cause: the `v_fakelibertycity` interior trigger present in the January 2025
-     binary release was removed from the May 2025 source. Restoring requires
-     reverse-engineering the original binary's use of that string and reimplementing
-     the missing function.
    - **LSPDFR logs "No game zone found" warnings at LC coordinates.** Cause: GTA V's
      named-zone system appears to be hardcoded in the executable; LCPP includes no
      named-zone metadata for Liberty City. Fix would require an ASI-level hook on
