@@ -17,6 +17,7 @@ void Level::ReadFiles(const std::string& name)
 	std::string mpIplPath = mainLevelFolder + name + "/IPLsMP" + extension;
 	std::string mpForcedIplPath = mainLevelFolder + name + "/IPLsMPForced" + extension;
 	std::string modIplPath = mainLevelFolder + name + "/ModIPLs" + extension;
+	std::string lodLightIplPath = mainLevelFolder + name + "/IPLsLODLights" + extension;
 	std::string pedPath = mainLevelFolder + name + "/ZonedPeds" + extension;
 	std::string radioPath = mainLevelFolder + name + "/ZonedRadioStations" + extension;
 	std::string scenarioPath = mainLevelFolder + name + "/Scenarios" + extension;
@@ -47,6 +48,10 @@ void Level::ReadFiles(const std::string& name)
 	hasModIplGroup = worldtravel::file::doesFileExist(modIplPath);
 	if (hasModIplGroup)
 		modIplGroup.ReadFile(modIplPath);
+
+	hasLodLightIplGroup = worldtravel::file::doesFileExist(lodLightIplPath);
+	if (hasLodLightIplGroup)
+		lodLightIplGroup.ReadFile(lodLightIplPath);
 	
 	hasPedGroup = worldtravel::file::doesFileExist(pedPath);
 	if (hasPedGroup)
@@ -136,6 +141,8 @@ void Level::LoadLevel()
 	}
 	if (hasModIplGroup)
 		modIplGroup.RequestIplGroup(defaultMap);
+	if (hasLodLightIplGroup && loadLodLights)
+		lodLightIplGroup.RequestIplGroup(defaultMap);
 	if (hasPedGroup)
 		pedGroup.SuppressZonedModels(false, false);
 	if (hasRadioGroup)
@@ -239,6 +246,8 @@ void Level::UnloadLevel()
 	}
 	if (hasModIplGroup)
 		modIplGroup.RemoveIplGroup(defaultMap);
+	if (hasLodLightIplGroup && loadLodLights)
+		lodLightIplGroup.RemoveIplGroup(defaultMap);
 	if (hasPedGroup)
 		pedGroup.SuppressZonedModels(true, false);
 	if (hasRadioGroup)
@@ -328,6 +337,8 @@ void Level::DisableActiveFiles()
 	}
 	if (hasModIplGroup)
 		modIplGroup.RemoveIplGroupIfActive();
+	if (hasLodLightIplGroup)
+		lodLightIplGroup.RemoveIplGroupIfActive();
 	if (hasPedGroup)
 		pedGroup.SuppressZonedModels(true, false);
 	if (hasRadioGroup)

@@ -428,6 +428,7 @@ namespace levelSwitch
 		northYankton.SetProperties("North Yankton", 2, 1, 0, 1, false, false);
 		cayoPerico.SetProperties("Cayo Perico", 3, 2, 1, 2, false, true);
 		libertyCity.SetProperties("Liberty City", 1, 1, 2, 3, false, false);
+		libertyCity.loadLodLights = loadLibertyLODLights;
 		santaFuegos.SetProperties("Santa Fuegos", 4, 0, 3, 0, false, false);
 
 		libertyCity.DisableActiveFiles();
@@ -1163,7 +1164,7 @@ namespace levelSwitch
 		libertyRadioGroup.EnableRadioStationGroup();*/
 		//loadMapLiberty(libertyScenarios, libertyZones, libertyAmbientZones, libertyPeds, libertyVehicles, libertyRadio, { 12, 13, 14, 16, 17, 18 });
 		loadMapLiberty({ 12, 13, 14, 16, 17, 18 });
-		
+
 		/*int weatherID = std::rand() % libertyWeatherTypes.size();
 		GAMEPLAY::SET_OVERRIDE_WEATHER(const_cast<char*>(libertyWeatherTypes[weatherID].c_str()));*/
 		/*libertyWeatherTypes.SetWeatherType();

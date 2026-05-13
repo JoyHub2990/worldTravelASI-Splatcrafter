@@ -48,6 +48,7 @@ public:
 	IplGroup mpIplGroup;
 	IplGroup mpForcedIplGroup;
 	IplGroup modIplGroup;
+	IplGroup lodLightIplGroup;
 	ZonedModelGroup pedGroup;
 	RadioStationGroup radioGroup;
 	ScenarioGroup scenarioGroup;
@@ -62,12 +63,19 @@ public:
 	bool hasMpIplGroup;
 	bool hasMpForcedIplGroup;
 	bool hasModIplGroup;
+	bool hasLodLightIplGroup;
 	bool hasPedGroup;
 	bool hasRadioGroup;
 	bool hasScenarioGroup;
 	bool hasVehicleGroup;
 	bool hasWeatherTypes;
 	bool hasZoneGroup;
+
+	// Per-level gate for the optional LOD-light IPL group. Defaults to true so
+	// any level whose Levels/<name>/IPLsLODLights.txt exists loads them; the
+	// caller can flip this off (e.g. Liberty City honours the user-facing
+	// EnableLibertyCityLODLights setting) before LoadLevel() runs.
+	bool loadLodLights = true;
 
 	int pathNodeState;
 	int globalWaterFile;
