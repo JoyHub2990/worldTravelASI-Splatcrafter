@@ -63,6 +63,19 @@
     `Minimap_Hooks` pattern installs so future Rockstar build bumps log
     rather than silently mis-install.
 
+  - **`WorldTravel/src/Level.{h,cpp}` + `LevelSwitch.cpp`** (`IPLsLODLights`
+    group support): added on 2026-05-13 to give any level an optional LOD-light
+    IPL group. `Level::ReadFiles` now also looks for
+    `Levels/<name>/IPLsLODLights.txt`; if the file exists, the parsed IPLs are
+    loaded by `LoadLevel`, unloaded by `UnloadLevel`, and removed-if-active by
+    `DisableActiveFiles`, alongside the other groups. A new per-level
+    `loadLodLights` flag (default `true`) gates whether the group is applied
+    on level entry; `levelSwitch::Init` flips Liberty City's flag to the
+    existing user-facing `Settings::EnableLibertyCityLODLights` value so the
+    pre-existing INI setting now drives a level-managed IPL group instead of
+    only the standalone LC nighttime-light request blocks. Any other level
+    just needs to ship the file to opt in.
+
    ## Changes from upstream (googleplex2010/worldTravelASI)
 
    - **`WorldTravelPatches/src/PopZones.h`**: Loosened pattern 2's jump-distance
